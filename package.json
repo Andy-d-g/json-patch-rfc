@@ -1,0 +1,31 @@
+{
+  "name": "json-patch-rfc",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "private": true,
+  "type": "module",
+  "author": {
+    "name": "Andy GUILLAUME",
+    "email": "andy.guillaume75@gmail.com",
+    "url": "https://devlapp.com"
+  },
+  "scripts": {
+    "build": "tsc --declaration --emitDeclarationOnly && tsup-node ./src/index.ts --format esm",
+    "test": "ENV=test vitest",
+    "test:coverage": "ENV=test vitest run --coverage"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "engines": {
+    "node": ">=22.16.0",
+    "typescript": ">=5.7"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.2",
+    "tsup-node": "^0.1.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
