@@ -188,13 +188,17 @@ class Reverter<T extends Doc> {
   }
 }
 
-function revertOperations<T extends Doc>(doc: T, ops: Operation[]): Operation[][] {
-  const reverted = Array.of<Operation[]>();
-  const reverter = new Reverter(doc);
-  for (const op of ops) {
-    reverted.push(reverter.revert(op));
+function revertOperations<T extends Doc>(doc: T, ops: ReadonlyArray<Operation>): Operation[][] {
+  const revertOps = Array.of<Operation[]>();
+  const copy = structuredClone(doc);
+  const reverter = new Reverter(copy);
+  for (const op of structuredClone(ops)) {
+    const revertOp = reverter.revert(op);
+    revertOps.push(revertOp);
+    applyOperations(copy, [op], { mutate: true });
   }
-  return reverted;
+  // Because we cancel so we start by the end
+  return revertOps.toReversed();
 }
 
 export default revertOperations;
