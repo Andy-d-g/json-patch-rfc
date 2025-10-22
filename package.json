@@ -1,31 +1,47 @@
 {
   "name": "json-patch-rfc",
   "version": "1.0.0",
+  "description": "JSON-Patch allows you to update a JSON document by sending the changes rather than the whole document.",
+  "homepage": "https://github.com/Andy-d-g/json-patch-rfc",
   "main": "./dist/index.js",
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
-  "private": true,
+  "private": false,
   "type": "module",
   "author": {
     "name": "Andy GUILLAUME",
     "email": "andy.guillaume75@gmail.com",
     "url": "https://devlapp.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Andy-d-g/json-patch-rfc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Andy-d-g/json-patch-rfc/issues",
+    "email": "andy.guillaume75@gmail.com"
+  },
+  "keywords": [
+    "json",
+    "patch",
+    "rfc"
+  ],
   "scripts": {
     "build": "tsc --declaration --emitDeclarationOnly && tsup-node ./src/index.ts --format esm",
     "test": "ENV=test vitest",
     "test:coverage": "ENV=test vitest run --coverage"
   },
-  "keywords": [],
   "license": "ISC",
   "engines": {
-    "node": ">=22.16.0",
+    "node": ">=22",
     "typescript": ">=5.7"
   },
+  "packageManager": "yarn@1.22.22",
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
+    "@types/node": "^22.18.12",
     "tsup-node": "^0.1.0",
-    "typescript": "^5.9.2",
+    "typescript": "6.0.0-dev.20251021",
     "vitest": "^3.2.4"
   }
 }

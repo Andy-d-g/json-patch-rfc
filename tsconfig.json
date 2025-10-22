@@ -13,8 +13,7 @@
     "useUnknownInCatchVariables": false,
     "noUnusedLocals": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "baseUrl": ".",
+    "rootDir": "./src"
   },
   "include": [
     "src"

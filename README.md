@@ -1,6 +1,6 @@
 # json-patch-rfc
 
-⚠️ Forked from fast-json-patch
+> Forked from fast-json-patch
 
 Tiny, fast utilities fully compatible with RFC 6902 (JSON Patch).
 
@@ -21,13 +21,13 @@ Mark Nottingham has a [nice blog]( http://www.mnot.net/blog/2012/09/05/patch) ab
 ## Commands
 ```bash
 # install
-pnpm install
+yarn install
 
 # build
-pnpm build
+yarn build
 
 # test
-pnpm test
+yarn test
 ```
 
 ## How to use
