@@ -10,11 +10,18 @@ Tiny, fast utilities fully compatible with RFC 6902 (JSON Patch).
 - Works in Node and the browser. TypeScript-ready.
 - **ESM-only**; CJS is **not** supported.
 
-# Commands
+## Why you should use JSON-Patch
 
+JSON-Patch [(RFC6902)](http://tools.ietf.org/html/rfc6902) is a standard format that
+allows you to update a JSON document by sending the changes rather than the whole document.
+JSON Patch plays well with the HTTP PATCH verb (method) and REST style programming.
+
+Mark Nottingham has a [nice blog]( http://www.mnot.net/blog/2012/09/05/patch) about it.
+
+## Commands
 ```bash
 # install
-pnpm install 
+pnpm install
 
 # build
 pnpm build
@@ -23,12 +30,11 @@ pnpm build
 pnpm test
 ```
 
-# How to use 
+## How to use
 
-## `compare(from: Doc, dest: Doc): Operation[]`
+### `compare(from: Doc, dest: Doc): Operation[]`
 
 Generates a patch that transforms the document `from` into the document `dest`.
-
 ```ts
 import { compare } from "json-patch-rfc";
 
@@ -44,24 +50,20 @@ const ops = compare(from, dest);
 */
 ```
 
-## `revertOperations<T extends Doc>(doc: T, ops: Operation[]): Operation[][]`
+### `revertOperations<T extends Doc>(doc: T, ops: Operation[]): Operation[][]`
 
-Creates inverse operations for each operation in a patch.
-Useful to roll back changes step-by-step.
-
+Creates inverse operations for each operation in a patch. Useful to roll back changes step-by-step.
 ```ts
 import { revertOperations, applyOperations } from "json-patch-rfc";
 
 const doc = { counter: 0 };
 const ops = [
-    { op: "replace", path: "/counter", value: 1 }
+  { op: "replace", path: "/counter", value: 1 }
 ];
 
 const reverted = revertOperations(doc, ops);
-/* 
-[
-    [{ op: "replace", path: "/counter", value: 0 }]
-]
+/*
+[ [{ op: "replace", path: "/counter", value: 0 }] ]
 */
 
 const updated = applyOperations(doc, ops);
@@ -69,12 +71,12 @@ const rolledBack = applyOperations(updated, reverted.flat());
 // rolledBack = { counter: 0 }
 ```
 
-## `applyOperations<T>(doc: Doc, operations: ReadonlyArray<Operation>, opts?: { mutate?: boolean }): T`
+### `applyOperations<T>(doc: Doc, operations: ReadonlyArray<Operation>, opts?: { mutate?: boolean }): T`
 
 Applies a sequence of operations to a document.
-- By default: immutable (returns a new doc).
-- With { mutate: true }: modifies in place.
 
+- By default: the doc will **not** be mutated. It will return a new doc.
+- With `{ mutate: true }`: it modifies the doc.
 ```ts
 import { applyOperations } from "json-patch-rfc";
 
@@ -85,7 +87,3 @@ const updated = applyOperations(original, ops);
 // updated = { name: "Ada Lovelace" }
 // original remains unchanged
 ```
-
-# Todo
-
-- Need to publish it on NPM package

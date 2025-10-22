@@ -1,9 +1,22 @@
 // ⚠️ FORKED FROM : fast-json-patch
 
+/**
+ * Checks whether an object has a given property as its own.
+ *
+ * @param obj - The object to check.
+ * @param key - The property key.
+ * @returns True if the object has the property as its own, false otherwise.
+ */
 export function hasOwnProperty(obj: Object, key: string) {
   return Object.hasOwn(obj, key);
 }
 
+/**
+ * Returns the keys of an object or array.
+ *
+ * @param obj - The object or array.
+ * @returns Array of keys (string indices for arrays, object keys otherwise).
+ */
 export function _objectKeys(obj: Object): string[] {
   if (Array.isArray(obj)) {
     const keys = new Array(obj.length);
@@ -15,6 +28,13 @@ export function _objectKeys(obj: Object): string[] {
   return Object.keys(obj);
 }
 
+/**
+ * Normalizes a JSON Pointer path, replacing "-" with the array length.
+ *
+ * @param list - The array associated with the path.
+ * @param path - The path to normalize.
+ * @returns Normalized path.
+ */
 export function normalizePath(list: unknown[], path: string): string {
   if (path.at(-1) !== "-") return path;
   const npath = path.split("/");
@@ -22,7 +42,14 @@ export function normalizePath(list: unknown[], path: string): string {
   return npath.join("/");
 }
 
-//3x faster than cached /^\d+$/.test(str)
+/**
+ * Checks if a string represents an integer.
+ *
+ * Faster than regex check `/^\d+$/`.
+ *
+ * @param str - The string to check.
+ * @returns True if the string is an integer, false otherwise.
+ */
 export function isInteger(str: string): boolean {
   let i = 0;
   const len = str.length;
@@ -37,25 +64,35 @@ export function isInteger(str: string): boolean {
   }
   return true;
 }
+
 /**
- * Escapes a json pointer path
- * @param path The raw pointer
- * @return the Escaped path
+ * Escapes a JSON Pointer path component.
+ *
+ * @param path - The raw pointer string.
+ * @returns Escaped path component.
  */
 export function escapePathComponent(path: string): string {
   if (path.indexOf("/") === -1 && path.indexOf("~") === -1) return path;
   return path.replace(/~/g, "~0").replace(/\//g, "~1");
 }
+
 /**
- * Unescapes a json pointer path
- * @param path The escaped pointer
- * @return The unescaped path
+ * Unescapes a JSON Pointer path component.
+ *
+ * @param path - The escaped pointer string.
+ * @returns Unescaped path component.
  */
 export function unescapePathComponent(path: string): string {
   return path.replace(/~1/g, "/").replace(/~0/g, "~");
 }
 
-// TODO : CHANGE
+/**
+ * Recursively finds the JSON Pointer path to an object within a root object.
+ *
+ * @param root - Root object to search.
+ * @param obj - Target object to find.
+ * @returns The path to the object, ending with a slash, or empty string if not found.
+ */
 export function _getPathRecursive(root: any, obj: Object): string {
   let found = "";
   for (const key in root) {
@@ -73,32 +110,25 @@ export function _getPathRecursive(root: any, obj: Object): string {
   return "";
 }
 
+/**
+ * Checks if a value is a plain object (not array or null).
+ *
+ * @param value - Value to check.
+ * @returns True if the value is a plain object.
+ */
 export function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && Array.isArray(value) === false && value !== null;
 }
 
-// based on https://github.com/epoberezkin/fast-deep-equal
-// MIT License
-
-// Copyright (c) 2017 Evgeny Poberezkin
-
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+/**
+ * Deep equality check for two values (objects, arrays, or primitives).
+ *
+ * Based on fast-deep-equal (MIT License).
+ *
+ * @param a - First value.
+ * @param b - Second value.
+ * @returns True if values are deeply equal, false otherwise.
+ */
 export function areEquals(a: any, b: any): boolean {
   if (a === b) return true;
 
@@ -136,6 +166,6 @@ export function areEquals(a: any, b: any): boolean {
     return true;
   }
 
-  // biome-ignore lint/suspicious/noSelfCompare: <code from a lib : probably a good reason>
+  // biome-ignore lint/suspicious/noSelfCompare: <from the fork>
   return a !== a && b !== b;
 }

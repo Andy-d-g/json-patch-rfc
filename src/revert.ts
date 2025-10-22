@@ -12,14 +12,27 @@ import type {
   TestOperation
 } from "./operations";
 
+/**
+ * Returns the parent path of a JSON pointer.
+ *
+ * @param path - JSON Pointer string
+ * @returns Parent path or empty string if at root/top-level
+ */
 function getParentPath(path: string): string {
   const segments = path.split("/");
-
-  if (segments.length <= 2) return ""; // root or top-level path
-
+  if (segments.length <= 2) return "";
   return segments.slice(0, -1).join("/");
 }
 
+/**
+ * Resolves a path containing the special "-" for add or copy operations.
+ *
+ * "-" indicates adding at the end of an array.
+ *
+ * @param doc - The document being patched
+ * @param op - The add or copy operation
+ * @returns Resolved path string
+ */
 function resolveDashPath<T extends Doc>(doc: T, op: AddOperation | CopyOperation): string {
   const segments = op.path.split("/");
   const last = segments.at(-1);
@@ -41,16 +54,26 @@ function resolveDashPath<T extends Doc>(doc: T, op: AddOperation | CopyOperation
     });
   }
 
-  // Replace "-" with correct index: `length` for add, `length - 1` for copy
   const index = op.op === "add" ? parent.length : parent.length - 1;
   segments[segments.length - 1] = index.toString();
 
   return segments.join("/");
 }
 
+/**
+ * Class for generating inverse JSON Patch operations.
+ *
+ * @template T - The document type
+ */
 class Reverter<T extends Doc> {
   constructor(private doc: T) {}
 
+  /**
+   * Returns the inverse operation(s) for a given JSON Patch operation.
+   *
+   * @param op - The operation to revert
+   * @returns Array of inverse operations
+   */
   revert(op: Operation): Operation[] {
     switch (op.op) {
       case "test":
@@ -98,6 +121,14 @@ class Reverter<T extends Doc> {
     return { op: "replace", path: op.path, value: get.value };
   }
 
+  /**
+   * Returns the inverse operations for a move operation.
+   *
+   * Handles multiple complex scenarios depending on array/object structures.
+   *
+   * @param op - The move operation to revert
+   * @returns Array of inverse operations
+   */
   // ⚠️ Dirty code
   private revertMove(op: MoveOperation): Operation[] {
     const ops = Array.of<Operation>();
@@ -188,6 +219,14 @@ class Reverter<T extends Doc> {
   }
 }
 
+/**
+ * Generates inverse operations for a list of JSON Patch operations.
+ *
+ * @template T - Document type
+ * @param doc - The original document
+ * @param ops - Array of operations to revert
+ * @returns Array of arrays of inverse operations, reversed to apply from the end
+ */
 function revertOperations<T extends Doc>(doc: T, ops: ReadonlyArray<Operation>): Operation[][] {
   const revertOps = Array.of<Operation[]>();
   const copy = structuredClone(doc);

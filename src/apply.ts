@@ -12,6 +12,13 @@ import type {
   TestOperation
 } from "./operations";
 
+/**
+ * Helper to generate an InvalidKeyError for invalid keys in operations.
+ * @param operationIndex - Index of the operation in the array.
+ * @param operation - The operation object.
+ * @param doc - Current document.
+ * @returns An instance of InvalidKeyError.
+ */
 function getInvalidKeyError(operationIndex: number, operation: Operation, doc: unknown) {
   return new InvalidKeyError({
     message: `The operation '${operationIndex}' pointer must be an object with a string key or an array with a number key`,
@@ -23,9 +30,18 @@ function getInvalidKeyError(operationIndex: number, operation: Operation, doc: u
 
 type Key = string | number;
 
+/**
+ * Class responsible for applying JSON Patch operations to a document.
+ * Supports all RFC-6902 operations including add, remove, replace, move, copy, test, and _get.
+ */
 class Patcher {
   private doc: unknown;
 
+  /**
+   * Create a new Patcher instance.
+   * @param doc - Document to patch.
+   * @param mutate - If true, operations modify the original document, otherwise a clone is used.
+   */
   constructor(doc: Doc, mutate: boolean) {
     if (mutate) {
       this.doc = doc;
@@ -34,10 +50,18 @@ class Patcher {
     this.doc = structuredClone(doc);
   }
 
+  /**
+   * Returns the current document state.
+   */
   get() {
     return this.doc;
   }
 
+  /**
+   * Applies a single JSON Patch operation.
+   * @param op - Operation to apply.
+   * @param opIndex - Index of the operation in the operations array.
+   */
   applyOperation(op: Operation, opIndex: number) {
     if (op.path === "") {
       return this.applyToRoot(op, opIndex);
@@ -45,6 +69,11 @@ class Patcher {
     return this.applyInDepth(op, opIndex);
   }
 
+  /**
+   * Applies an operation targeting the root document.
+   * @param op - Operation to apply.
+   * @param opIndex - Index of the operation.
+   */
   private applyToRoot(op: Operation, opIndex: number) {
     if (op.op === "add") {
       this.doc = op.value;
@@ -78,6 +107,11 @@ class Patcher {
     });
   }
 
+  /**
+   * Applies an operation to a nested path in the document.
+   * @param op - Operation to apply.
+   * @param opIndex - Index of the operation.
+   */
   private applyInDepth(op: Operation, opIndex: number) {
     if (op.op === "copy") {
       return this.copy(op, opIndex);
@@ -147,6 +181,13 @@ class Patcher {
     return this.execOperation(op, ptr, lastIndex, opIndex);
   }
 
+  /**
+   * Executes the operation on the given target.
+   * @param op - Operation to execute.
+   * @param ptr - Target object or array.
+   * @param key - Key or index to apply the operation to.
+   * @param opIndex - Index of the operation.
+   */
   private execOperation(op: Operation, ptr: Doc, key: Key, opIndex: number) {
     switch (op.op) {
       case "_get":
@@ -173,6 +214,7 @@ class Patcher {
     }
   }
 
+  /** Adds a value at the specified key in object or array. */
   private add(op: AddOperation, ptr: Doc, key: Key, opIndex: number) {
     if (Array.isArray(ptr) && typeof key === "number") {
       ptr.splice(key, 0, op.value);
@@ -185,6 +227,7 @@ class Patcher {
     throw getInvalidKeyError(opIndex, op, this.doc);
   }
 
+  /** Removes a value at the specified key in object or array. */
   private remove(op: RemoveOperation, ptr: Doc, key: Key, opIndex: number) {
     if (Array.isArray(ptr) && typeof key === "number") {
       ptr.splice(key, 1);
@@ -197,6 +240,7 @@ class Patcher {
     throw getInvalidKeyError(opIndex, op, this.doc);
   }
 
+  /** Moves a value from one path to another. */
   private move(op: MoveOperation, opIndex: number) {
     const value = structuredClone(this.getValueByPointer(op.from, opIndex));
     this.applyOperation({ op: "remove", path: op.from }, opIndex);
@@ -204,6 +248,7 @@ class Patcher {
     return this.doc;
   }
 
+  /** Replaces a value at the specified key in object or array. */
   private replace(op: ReplaceOperation, ptr: Doc, key: Key, opIndex: number) {
     if (Array.isArray(ptr) && typeof key === "number") {
       ptr[key] = op.value;
@@ -216,6 +261,7 @@ class Patcher {
     throw getInvalidKeyError(opIndex, op, this.doc);
   }
 
+  /** Copies a value from one path to another. */
   private copy(op: CopyOperation, opIndex: number) {
     // enforce copy by value so further operations don't affect source
     const value = structuredClone(this.getValueByPointer(op.from, opIndex));
@@ -223,6 +269,7 @@ class Patcher {
     return this.doc;
   }
 
+  /** Retrieves a value at the specified key. */
   private _get(op: GetOperation, ptr: Doc, key: Key, opIndex: number) {
     if (Array.isArray(ptr) && typeof key === "number") {
       op.value = ptr[key];
@@ -235,6 +282,7 @@ class Patcher {
     throw getInvalidKeyError(opIndex, op, this.doc);
   }
 
+  /** Retrieves a value from a JSON pointer. */
   private getValueByPointer(pointer: string, opIndex: number) {
     if (pointer === "") {
       return this.doc;
@@ -244,6 +292,7 @@ class Patcher {
     return op.value;
   }
 
+  /** Tests if the value at a path equals the expected value. */
   private test(op: TestOperation, ptr: unknown, opIndex: number) {
     if (areEquals(ptr, op.value)) {
       return this.doc;
@@ -257,21 +306,20 @@ class Patcher {
   }
 }
 
+/** Options for `applyOperations` function. */
 type Options = {
   mutate?: boolean;
 };
 
 /**
- * Applies an array of operations to a JSON document.
+ * Applies an array of JSON Patch operations to a document.
  *
- * Modifies the `doc` in place if `mutate` is true. Otherwise, returns a deep copy with the changes applied.
- *
- * @template T The type of the resulting patched document.
- * @param doc - The document to patch.
- * @param operations - The list of operations to apply.
+ * @template T - The type of the resulting patched document.
+ * @param doc - Document to apply operations to.
+ * @param operations - Array of JSON Patch operations.
  * @param opts - Optional settings.
- * @param opts.mutate - If true, directly modifies the input document (default: false).
- * @returns The updated document (same reference if `mutate` is true, otherwise a new copy).
+ * @param opts.mutate - If true, operations modify the original document. Defaults to false.
+ * @returns The patched document. Same reference if `mutate` is true, otherwise a clone.
  */
 function applyOperations<T = unknown>(doc: Doc, operations: ReadonlyArray<Operation>, opts: Options = {}): T {
   const mutate = opts.mutate || false;
