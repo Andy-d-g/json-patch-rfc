@@ -5,7 +5,15 @@
   "homepage": "https://github.com/Andy-d-g/json-patch-rfc",
   "main": "./dist/index.js",
   "source": "./src/index.ts",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
   "private": false,
   "type": "module",
   "author": {
