@@ -1,11 +1,10 @@
 {
   "name": "json-patch-rfc",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "JSON-Patch allows you to update a JSON document by sending the changes rather than the whole document.",
   "homepage": "https://github.com/Andy-d-g/json-patch-rfc",
   "main": "./dist/index.js",
   "source": "./src/index.ts",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -14,6 +13,9 @@
       "default": "./dist/index.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "private": false,
   "type": "module",
   "author": {
